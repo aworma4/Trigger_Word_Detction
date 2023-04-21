@@ -177,7 +177,7 @@ class Create_Test_Train_Data():
         
         return positive_sample, negative_sample, 
     
-    
+'''    
 # run the class     
     
 background_filepath =  'speech_commands_v0.02.tar/_background_noise_/doing_the_dishes.wav'
@@ -190,4 +190,4 @@ outpath_location = 'data'
 
 val = Create_Test_Train_Data(background_filepath, sample_time,resample_rate,number_samples, folder_trigger_word,folder_negative_word,outpath_location)
 
-# need to add in some tests
+'''
