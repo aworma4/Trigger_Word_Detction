@@ -6,6 +6,7 @@ import torchaudio.transforms as T
 import matplotlib.pyplot as plt
 import librosa
 import torch
+import glob
 
 
 def create_spectrogram(waveform,number_frequencies = 101,number_time_steps = 511):
@@ -89,3 +90,127 @@ Custom DATA loader
 ###############################################
 '''
 
+
+
+class ReadData(torch.utils.data.Dataset):
+    '''
+    created data reader
+    '''
+    
+    def __init__(self, str_type = 'test',spectrogram_str ='False',number_frequencies = 101,number_time_steps = 511):
+          
+
+        if str_type=='test':
+            folder = 'data/test/'
+        else:
+            folder = 'data/train/'
+
+        #generate file paths     
+
+        data_negative = sorted(glob.glob(folder + 'data_negative*.wav'))
+        data_positive = sorted(glob.glob(folder + 'data_positive*.wav'))
+
+        label_negative = sorted(glob.glob(folder + 'label_negative*.pt'))
+        label_positive = sorted(glob.glob(folder + 'label_positive*.pt'))
+
+        self.data = data_negative + data_positive 
+        self.label = label_negative + label_positive
+        
+        self.number_frequencies = number_frequencies
+        self.number_time_steps = number_time_steps
+        self.spectrogram_str = spectrogram_str
+        
+    def create_spectrogram(self,waveform_shape):
+        '''
+        Output is a spectrogram of size [1,number_frequencies, ~number_time_steps]
+        '''
+
+
+        n_fft = self.number_frequencies*2  -1 # to ensure we have 101 frequencies 
+        win_length = None
+        hop_length =int( waveform_shape/number_time_steps) # ensures we have 5556 time steps - as close to 5511 as I could get
+
+        # define transformation
+        spectrogram = T.Spectrogram(
+            n_fft=n_fft,
+            win_length=win_length,
+            hop_length=hop_length,
+            center=True,
+            pad_mode="reflect",
+            power=2.0,
+        )
+        return spectrogram    
+        
+        
+        
+    def __len__(self):
+        
+        return len(self.data)
+    
+    
+    
+    
+    
+    def __getitem__(self, index):
+        # print(data)
+        # print(index)
+        wave,sample_rate = torchaudio.load(self.data[index])
+        label= torch.load(self.label[index])
+        
+  
+        
+        #reshape to [1,x] size
+        shape = label.shape[1]
+        label.reshape([1,shape])
+        
+        
+        if self.spectrogram_str == 'True':
+            wave_shape = wave.shape[1]    
+            spectrogram = self.create_spectrogram(wave_shape)
+            wave = spectrogram(wave)
+            return [wave,label]
+        
+        else:
+            return [[wave,sample_rate],label]
+    
+'''
+#example data loading
+
+test = ReadData()
+
+[[wave1,sample_rate],label1] = test[0]
+
+[[wave2,sample_rate],label2] = test[1]
+
+
+spec_wave1 = create_spectrogram(wave1)
+
+    
+plot_spectrogram(spec_wave1[0], label1, title='torchaudio')
+
+Audio(waveform.numpy()[0], rate=resample_rate)
+
+
+spec_wave2 = create_spectrogram(wave2)
+
+    
+plot_spectrogram(spec_wave2[0], label2, title='torchaudio')
+
+Audio(waveform.numpy()[0], rate=resample_rate)
+
+'''
+
+
+
+'''
+Create DataLoader - can specify as wav or spectrogram
+
+from torch.utils.data import DataLoader
+test = ReadData('test')
+train = ReadData('train')
+
+batch_size = 4
+train_loader = DataLoader(train, batch_size, shuffle=False)
+test_loader = DataLoader(test, batch_size, shuffle=False)
+
+'''
