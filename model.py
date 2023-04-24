@@ -100,7 +100,12 @@ class TriggerWord_LSTM(nn.Module):
                
         return out
         
-        
-  
-
-
+    
+def get_accuracy(y_true, y_prob,cutoff=0.8):
+    y_true = y_true.squeeze()
+    y_prob = y_prob.squeeze()
+    
+    
+    assert y_true.ndim == 1 and y_true.size() == y_prob.size()
+    y_prob = y_prob > cutoff
+    return (y_true == y_prob).sum().item() / y_true.size(0)

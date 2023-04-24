@@ -83,7 +83,7 @@ class Create_Test_Train_Data():
             return label_random    
     
     
-    def generate_positive_sample(self,background,filepath):
+    def generate_sample(self,bool_tw,background,filepath):
         # load audio  
         waveform, sample_rate = torchaudio.load(filepath)
         #resample 
@@ -111,7 +111,7 @@ class Create_Test_Train_Data():
         waveform_padded_random[0,start:end]  = waveform_resample + background[0,start:end]
 
         # finally create label
-        label = self.create_labels(True,start, end, background_length)   
+        label = self.create_labels(bool_tw,start, end, background_length)   
 
         return waveform_padded_random, label
     
@@ -132,9 +132,10 @@ class Create_Test_Train_Data():
         #need to geneate background each loop - some how it was getting overwritten
         
         #geneate positive lables 
+        bool_tw = True
         for I in range(self.number_samples):
             background = self.create_background()
-            positive_sample,label = self.generate_positive_sample(background,positive_filepaths[I])
+            positive_sample,label = self.generate_sample(bool_tw,background,positive_filepaths[I])
             name= f'data_positive_{I}.wav'
             label_name = f'label_positive_{I}.pt'
 
@@ -154,9 +155,10 @@ class Create_Test_Train_Data():
             torch.save(label,path_label)
             
         #generate negative labels
+        bool_tw = False
         for I in range(self.number_samples):
             background = self.create_background()
-            negative_sample,label = self.generate_positive_sample(background,negative_filepaths[I])
+            negative_sample,label = self.generate_sample(bool_tw,background,negative_filepaths[I])
             name= f'data_negative_{I}.wav'
             label_name = f'label_negative_{I}.pt'
 
@@ -190,4 +192,5 @@ outpath_location = 'data'
 
 val = Create_Test_Train_Data(background_filepath, sample_time,resample_rate,number_samples, folder_trigger_word,folder_negative_word,outpath_location)
 
+val.generate_all()
 '''
