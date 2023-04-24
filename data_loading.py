@@ -1,7 +1,7 @@
 '''
 Data Loading and Analysis
 '''
-
+import torchaudio
 import torchaudio.transforms as T
 import matplotlib.pyplot as plt
 import librosa
@@ -128,7 +128,7 @@ class ReadData(torch.utils.data.Dataset):
 
         n_fft = self.number_frequencies*2  -1 # to ensure we have 101 frequencies 
         win_length = None
-        hop_length =int( waveform_shape/number_time_steps) # ensures we have 5556 time steps - as close to 5511 as I could get
+        hop_length =int( waveform_shape/self.number_time_steps) # ensures we have 5556 time steps - as close to 5511 as I could get
 
         # define transformation
         spectrogram = T.Spectrogram(
@@ -214,3 +214,58 @@ train_loader = DataLoader(train, batch_size, shuffle=False)
 test_loader = DataLoader(test, batch_size, shuffle=False)
 
 '''
+
+
+
+'''
+Change label size functions
+'''
+
+
+def resize_label(label_og, desired_size):
+    '''
+    Function to create a reduced label tensor  by extracting the maximum 
+    values from slices of the larger tensor and inserting these into the smaller one
+    '''
+    initial_size = label_og.shape[1]
+    print(f'reduced from {initial_size} to {desired_size}')
+    
+    #calculate the ratio of the two sizes
+    ratio = initial_size / desired_size
+    
+    #create tensor of hold new labelse
+    label_new = torch.zeros([1,desired_size])
+
+    #loop through the new array assigning maximum values to each entry
+    int_val = int(ratio)
+
+
+    for I in range(desired_size):
+        start= int_val * (I)    
+        #print(start)    
+        if I == desired_size-1:
+            #set the value of the final
+            label_new[0,I] = torch.max(label_og[0,start:])
+        else:
+            end = start + desired_size
+            label_new[0,I] = torch.max(label_og[0,start:end])
+            
+    return label_new
+    
+    
+def plot_new_vs_old_label(label_og,label_new):
+    
+    initial_size = label_og.shape[1]
+    desired_size = label_new.shape[1]
+
+    #create xvectors with same range differenet size
+    x_initial = torch.arange(0,1,1/initial_size)
+    x_desired = torch.arange(0,1,1/desired_size)
+
+    #plot
+    fig, ax = plt.subplots(1, 1,sharex=True)
+    ax.plot(x_initial, label_og[0])
+    ax.plot(x_desired, label_new[0])
+    ax.legend(['initial','desired'])
+
+    plt.show(block=False)
