@@ -71,7 +71,7 @@ class TriggerWord_LSTM(nn.Module):
         #GRU
         # calculate size of final dimension from conv1d - equation from documentation
         #https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html
-        Conv_outsize = int(((input_time + 2 * self.Conv.padding[0] - self.Conv.dilation[0] * (self.Conv.kernel_size[0] -1) -1 )/self.Conv.stride[0]) + 1 )
+        Conv_outsize = self.Conv(torch.ones([1,self.input_freq,self.input_time])).shape[2]
         
         self.GRU = nn.GRU(input_size =Conv_outsize, 
         hidden_size =hidden_time,

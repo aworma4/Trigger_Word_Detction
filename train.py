@@ -12,7 +12,15 @@ from data_loading import *
 from torch.utils.data import DataLoader
 from torchsummary import summary
 
-epochs = 4
+epochs = 20
+lr =0.001
+batch_size = 4
+
+#spectrogram parameters
+spec_freq = 101
+spec_time = 5511
+#label time
+label_time = 1375
 
 
 
@@ -20,10 +28,9 @@ epochs = 4
 #### Load data 
 
 test_waveform = ReadData('test',spectrogram_str='False')
-test = ReadData('test',spectrogram_str='True',number_frequencies = 101,number_time_steps = 1375)
-train = ReadData('train',spectrogram_str='True',number_frequencies = 101,number_time_steps = 1375)
+test = ReadData('test',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
+train = ReadData('train',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
 
-batch_size = 4
 train_loader = DataLoader(train, batch_size, shuffle=False)
 test_loader = DataLoader(test, batch_size, shuffle=False)
 
@@ -31,15 +38,15 @@ test_loader = DataLoader(test, batch_size, shuffle=False)
 #### Initialise model
 
 # import the model and initialise 
+#load in to know the size of the spectrogram - the fft does quite give you a spec_time length for the time dimension
 spec_wave = test[-1][0]
 spec_label = test[-1][1]
 
-spec_label_new =  resize_label(spec_label, 500)
 
 
 input_freq =spec_wave.shape[1]
 input_time = spec_wave.shape[2]
-output_time = spec_label_new.shape[1]
+output_time = label_time
 hidden_time = output_time #could change this down the line 
 
 
@@ -47,12 +54,13 @@ model = TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv
 
 
 #model.Conv
-summary(model, (101,1389))    
+print("input shape: (1,{input_freq},{input_time})")  
+summary(model, (input_freq,input_time))     
 
 #### Choose optimizers
 criterion = torch.nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
-
+optimizer = optim.Adam(model.parameters(), lr=lr)
+#torch.optim.SGD(model.parameters(), lr=lr) # doesnot work
 
 
 
@@ -67,7 +75,7 @@ for epoch in range(epochs):  # loop over the dataset multiple times
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels_og = data
         
-        labels =  resize_label(labels_og, 500)
+        labels =  resize_label(labels_og, label_time)
         
 
         # zero the parameter gradients
@@ -87,6 +95,8 @@ for epoch in range(epochs):  # loop over the dataset multiple times
 
 print('Finished Training')
 
+### Save model
+torch.save(model, 'model_test')
 
 
 ##### Print accuracy for each part of the test data
@@ -97,11 +107,14 @@ for i, data in enumerate(testloader, 0):
     # get the inputs; data is a list of [inputs, labels]
     inputs, labels_og = data
 
-    labels =  resize_label(labels_og, 500)
+    labels =  resize_label(labels_og, label_time)
     
     out = model(inputs)
     
     print(get_accuracy(labels, out,cutoff=0.8))
     
     #plot 
-    #plot_new_vs_old_label(labels,out.detach().numpy())
+    plot_new_vs_old_label(labels,out.detach().numpy())
+    
+    
+   
