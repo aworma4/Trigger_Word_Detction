@@ -228,7 +228,7 @@ def resize_label(label_og, desired_size):
     values from slices of the larger tensor and inserting these into the smaller one
     '''
     initial_size = label_og.shape[1]
-    print(f'reduced from {initial_size} to {desired_size}')
+    #print(f'reduced from {initial_size} to {desired_size}')
     
     #calculate the ratio of the two sizes
     ratio = initial_size / desired_size
