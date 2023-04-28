@@ -12,7 +12,7 @@ from data_loading import *
 from torch.utils.data import DataLoader
 from torchsummary import summary
 
-epochs = 10
+epochs = 53
 cutoff = 0.1 # using a really low one 
 lr =0.01
 batch_size = 4
@@ -51,11 +51,12 @@ output_time = label_time
 hidden_time = output_time #could change this down the line 
 
 
-model = TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
+model = torch.load('model_test_28_04_23_100_epochs')
+#TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
 
 
 #model.Conv
-print("input shape: (1,{input_freq},{input_time})")  
+print(f"input shape: (1,{input_freq},{input_time})")  
 summary(model, (input_freq,input_time))     
 
 #### Choose optimizers
@@ -85,6 +86,7 @@ for epoch in range(epochs):  # loop over the dataset multiple times
 
     running_loss = 0.0
     running_accuracy = 0.0
+    running_av_label = 0.0 
     for i, data in enumerate(trainloader, 0):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels_og = data
@@ -104,12 +106,13 @@ for epoch in range(epochs):  # loop over the dataset multiple times
         # print statistics
         running_loss += loss.item()
         running_accuracy += get_accuracy(labels, outputs,cutoff=cutoff)
+        running_av_label += torch.mean(labels)
         # if i % 4 == 3:    # print every 2000 mini-batches
         #     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.7f}')
         #     running_loss = 0.0
     
     
-    print(f'Epoch [{epoch + 1}] loss: {loss}, learning rate {scheduler.get_lr()}, training accuracy cutoff ({cutoff}): {running_accuracy/N_trainloader}')
+    print(f'Epoch [{epoch + 1}] loss: {loss}, learning rate {scheduler.get_lr()}, training accuracy cutoff ({cutoff}): {running_accuracy/N_trainloader}, average label {running_av_label/N_trainloader}')
     scheduler.step()
     
 
@@ -117,6 +120,7 @@ print('Finished Training')
 
 ### Save model
 torch.save(model, 'model_test')
+
 
 
 ##### Print accuracy for each part of the test data
@@ -137,4 +141,29 @@ for i, data in enumerate(testloader, 0):
     plot_new_vs_old_label(labels,out.detach().numpy())
     
     
-   
+
+    
+#### Example accuracy 
+#Note by settign every label = torch.zeros we can get an accuracy out of 0.945
+# just to note 
+criterion = torch.nn.BCELoss()
+acc_total = 0.0
+loss_total = 0.0
+for i, data in enumerate(testloader, 0):
+    # get the inputs; data is a list of [inputs, labels]
+    inputs, labels_og = data
+
+    labels =  resize_label(labels_og, label_time)
+    
+    out = torch.zeros([1,labels.shape[1]])
+    
+    acc = get_accuracy(labels, out,cutoff=0.8)
+    loss = criterion(out,labels)
+    print(acc,loss)
+    loss_total += loss
+    acc_total += acc
+print('average accuracy if the model returns a torch.zeros')
+print(acc_total/(i+1))
+print('average loss  if the model returns a torch.zeros')
+print(loss_total/(i+1))
+    

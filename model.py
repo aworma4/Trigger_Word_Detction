@@ -109,3 +109,53 @@ def get_accuracy(y_true, y_prob,cutoff=0.8):
     assert y_true.ndim == 1 and y_true.size() == y_prob.size()
     y_prob = y_prob > cutoff
     return (y_true == y_prob).sum().item() / y_true.size(0)
+
+
+
+'''
+# Simpler models - based upon:
+https://github.com/streamride/wakeworddetection/blob/main/model.py
+'''
+
+
+# Simple RNN  
+class SimpleRNN(nn.Module):
+    def __init__(self, spec_time, dropout_rate=0.5):
+        super().__init__()
+        hidden_layer = 2*spec_time
+        hidden_layer2 = spec_time/2
+        
+        self.rnn = nn.LSTM(spec_time,hidden_layer, batch_first=True)
+        self.classifier = nn.Sequential(
+            nn.Linear(hidden_layer, spec_time),
+            nn.LeakyReLU(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(hidden_layer, hidden_layer2),
+            nn.LeakyReLU(),
+            nn.Linear(hidden_layer2,1)
+        )
+        # self.fc1 = nn.Linear(256, 128)
+        # self.fc = nn.Linear(128, 1)
+        self.dropout = nn.Dropout(dropout_rate)
+
+        self.layer_norm = nn.LayerNorm(hidden_layer2)
+
+    # def init_hidden(self, batch_size):
+        # return 
+
+    def forward(self, x):
+        x = x.squeeze(1)
+        x = self.layer_norm(x)
+        # print(x.shape)
+        # x = x.transpose(0,1)
+        # x = x.transpose(1,2)
+        
+        # print(x.shape)
+        x, (hidden_last, cell_last) = self.rnn(x)
+        hidden_last = self.dropout(hidden_last)
+        # print(x.shape)
+        # print(hidden_last.shape)
+        hidden_last = hidden_last.squeeze(0)
+        x = self.classifier(hidden_last)
+        # print(x.shape)
+        return x
