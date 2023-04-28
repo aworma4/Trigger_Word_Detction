@@ -1,7 +1,7 @@
 '''
 # Main model file 
 '''
-
+import torch
 
 def get_default_device():
     '''

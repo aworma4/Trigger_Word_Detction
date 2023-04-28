@@ -12,8 +12,9 @@ from data_loading import *
 from torch.utils.data import DataLoader
 from torchsummary import summary
 
-epochs = 20
-lr =0.001
+epochs = 10
+cutoff = 0.1 # using a really low one 
+lr =0.01
 batch_size = 4
 
 #spectrogram parameters
@@ -59,7 +60,18 @@ summary(model, (input_freq,input_time))
 
 #### Choose optimizers
 criterion = torch.nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=lr)
+
+#alternate optmizer + scheduler - from guidance from https://www.assemblyai.com/blog/end-to-end-speech-recognition-pytorch/
+optimizer = optim.AdamW(model.parameters(), lr)
+scheduler = optim.lr_scheduler.OneCycleLR(optimizer,
+	max_lr=lr,
+	steps_per_epoch=int(len(train)),
+	epochs=epochs,
+	anneal_strategy='linear')
+
+# from torch.optim.lr_scheduler import ExponentialLR 
+# optimizer = optim.Adam(model.parameters(), lr=lr)
+# scheduler = ExponentialLR(optimizer, gamma=0.9)
 #torch.optim.SGD(model.parameters(), lr=lr) # doesnot work
 
 
@@ -67,10 +79,12 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 ##### Training step
 
 trainloader = train
+N_trainloader = len(trainloader)
 
 for epoch in range(epochs):  # loop over the dataset multiple times
 
     running_loss = 0.0
+    running_accuracy = 0.0
     for i, data in enumerate(trainloader, 0):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels_og = data
@@ -89,9 +103,15 @@ for epoch in range(epochs):  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.item()
-        if i % 4 == 3:    # print every 2000 mini-batches
-            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.7f}')
-            running_loss = 0.0
+        running_accuracy += get_accuracy(labels, outputs,cutoff=cutoff)
+        # if i % 4 == 3:    # print every 2000 mini-batches
+        #     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.7f}')
+        #     running_loss = 0.0
+    
+    
+    print(f'Epoch [{epoch + 1}] loss: {loss}, learning rate {scheduler.get_lr()}, training accuracy cutoff ({cutoff}): {running_accuracy/N_trainloader}')
+    scheduler.step()
+    
 
 print('Finished Training')
 
