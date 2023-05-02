@@ -53,7 +53,7 @@ hidden_time = output_time #could change this down the line
 
 model = torch.load('model_test_28_04_23_100_epochs')
 #TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
-
+#SimpleRNN(time = input_time,dropout_rate=0.5)
 
 #model.Conv
 print(f"input shape: (1,{input_freq},{input_time})")  

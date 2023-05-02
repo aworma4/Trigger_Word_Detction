@@ -120,25 +120,33 @@ https://github.com/streamride/wakeworddetection/blob/main/model.py
 
 # Simple RNN  
 class SimpleRNN(nn.Module):
-    def __init__(self, spec_time, dropout_rate=0.5):
+    def __init__(self, time = 128,dropout_rate=0.5):
         super().__init__()
-        hidden_layer = 2*spec_time
-        hidden_layer2 = spec_time/2
         
-        self.rnn = nn.LSTM(spec_time,hidden_layer, batch_first=True)
+        # in https://github.com/streamride/wakeworddetection/blob/main/model.py - the number of hidden layers increases then decreases
+        self.time = time
+        hidden   = int(self.time * 2)
+        hidden2  = int(self.time / 2)
+        
+        
+        
+        self.rnn = nn.LSTM(self.time, hidden, batch_first=False)
         self.classifier = nn.Sequential(
-            nn.Linear(hidden_layer, spec_time),
+            nn.Linear(hidden, time),
             nn.LeakyReLU(),
             nn.Dropout(dropout_rate),
-            nn.Linear(hidden_layer, hidden_layer2),
+            nn.Linear(time, hidden2),
             nn.LeakyReLU(),
-            nn.Linear(hidden_layer2,1)
+            nn.Linear(hidden2,1)
         )
         # self.fc1 = nn.Linear(256, 128)
         # self.fc = nn.Linear(128, 1)
         self.dropout = nn.Dropout(dropout_rate)
 
-        self.layer_norm = nn.LayerNorm(hidden_layer2)
+        self.layer_norm = nn.LayerNorm(time)
+        
+        # Sigmoid layer
+        self.Sigmoid = nn.Sigmoid()
 
     # def init_hidden(self, batch_size):
         # return 
@@ -157,5 +165,11 @@ class SimpleRNN(nn.Module):
         # print(hidden_last.shape)
         hidden_last = hidden_last.squeeze(0)
         x = self.classifier(hidden_last)
+        
+        x = x.reshape(1,-1)
+        
+        x = self.Sigmoid(x)
         # print(x.shape)
         return x
+
+
