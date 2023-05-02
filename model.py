@@ -119,6 +119,8 @@ https://github.com/streamride/wakeworddetection/blob/main/model.py
 
 
 # Simple RNN  
+# at the moment it collapses the last (time) dimension when we want it to collapse the frequency dimension  -
+# I'm unconvinced by the github that I'm using which was half finished and half formed.
 class SimpleRNN(nn.Module):
     def __init__(self, time = 128,dropout_rate=0.5):
         super().__init__()
