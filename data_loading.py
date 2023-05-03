@@ -41,6 +41,8 @@ def create_spectrogram(waveform,number_frequencies = 101,number_time_steps = 511
 def plot_spectrogram(spec,label, title=None, ylabel='freq_bin', aspect='auto', xmax=None):
     '''
     Plots a spectrogram with the corresponding labelling
+    Note the amplitude is rescalled so that the lower values aren't set uinformally to zero
+    - using teh librosa.power_to_db()
     '''
     fig, ax = plt.subplots(1, 1,sharex=True)
     axs = ax
