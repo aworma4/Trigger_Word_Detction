@@ -46,7 +46,7 @@ def plot_spectrogram(spec,label, title=None, ylabel='freq_bin', aspect='auto', x
     '''
     fig, ax = plt.subplots(1, 1,sharex=True)
     axs = ax
-    axs.set_title(title or 'Spectrogram (db)')
+    axs.set_title(title or 'Spectrogram (input rescaled using librosa.power_to_db())')
     axs.set_ylabel(ylabel)
     axs.set_xlabel('frame')
     im = axs.imshow(librosa.power_to_db(spec), origin='lower', aspect=aspect)
@@ -271,3 +271,72 @@ def plot_new_vs_old_label(label_og,label_new):
     ax.legend(['initial','desired'])
 
     plt.show(block=False)
+    
+    
+    
+    
+'''
+MEl and time masking data loading 
+'''
+
+from random import choice
+def mask_freq_time(spec, labels_og, t_l = 100, f_l = 2):
+    '''
+    spec - spectrogram 
+    labels_og - the origin lablels  for the wav file
+    t_l -  the length of the time mask
+    f_l - the length of the frequency mask 
+    
+    Returns a spectrogram with a t_1 width and f_l width section of the spectrogram set =0 
+    for the time and frequency dimensions respectively
+    
+    The time dimension will not be zeroed in the range where a trigger word apperas (denoted by a non zero value
+    of the labels_og) 
+    
+    The frequency dimension will not be zeroed in the bottom 10% of the frequency range - which is where the majority 
+    of human frequencies can appear
+    
+    '''
+    
+    #find the dimensions of the spectrogram
+
+    spec_time = spec.shape[-1]
+    spec_freq = spec.shape[1]
+    bottom_freq = int(0.1*spec_freq)
+
+    #want frequency to be 10 off the bottom - that's the human range 
+    #choose the start point for the frequencies mask
+    f_s = choice([i for i in range(bottom_freq,spec_freq)])
+
+
+
+    label_spec =  resize_label(labels_og, spec_time)
+
+    x = label_spec.squeeze(0).nonzero().tolist()
+
+    
+    #create lists storing the indicies where we can't put a window 
+    x2 = []
+    for I in x:
+        x2.append(I[0])
+    #now we have a list of the location of the trigger wor if it exists
+
+    # create a list that reserves the space t_l to the left of the trigger word
+    #so there is no overlap
+    x3 = []
+
+    #caputre case where there isn't a trigger word
+    if len(x2) > 0:
+        for I in range(x2[0] - t_l, x2[0]):
+            x3.append(I)
+
+    xreserved = x3 + x2
+
+    #choose the start point of the time mask
+    t_s = choice([i for i in range(0,spec_time) if i not in xreserved])
+
+
+    spec[:,:,t_s:t_s+t_l] = torch.zeros(t_l)
+    spec[:,f_s:f_s + f_l,:] = torch.zeros(f_l,spec.shape[-1])
+
+    return spec , label_spec
