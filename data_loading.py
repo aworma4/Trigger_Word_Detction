@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import librosa
 import torch
 import glob
-
+from random import choice
 
 def create_spectrogram(waveform,number_frequencies = 101,number_time_steps = 511):
     '''
@@ -276,10 +276,10 @@ def plot_new_vs_old_label(label_og,label_new):
     
     
 '''
-MEl and time masking data loading 
+############################################# MEl and time masking data loading 
 '''
 
-from random import choice
+
 def mask_freq_time(spec, labels_og, t_l = 100, f_l = 2):
     '''
     spec - spectrogram 
@@ -340,3 +340,119 @@ def mask_freq_time(spec, labels_og, t_l = 100, f_l = 2):
     spec[:,f_s:f_s + f_l,:] = torch.zeros(f_l,spec.shape[-1])
 
     return spec , label_spec
+
+
+
+
+
+
+
+class ReadData_Mel(torch.utils.data.Dataset):
+    '''
+    created data reader
+    
+    spectrogram_str - sets if we produce a waveform or spectrogram
+    normalize - set the normalize aruement of the spectrogram = True 
+    number_frequencies -  size of the frequency dimension of the spectrogram
+    number_time_steps - size of the time dimension of the spectrogram
+    t_l - width of the mask in the time dimension
+    f_l  - width of the mask in the frequency dimension
+    
+    '''
+    
+    def __init__(self, str_type = 'test',spectrogram_str =False, normalize = True, mask_str = True, number_frequencies = 101,number_time_steps = 200,t_l = 100, f_l = 2):
+          
+
+        if str_type=='test':
+            folder = 'data/test/'
+        else:
+            folder = 'data/train/'
+
+        #generate file paths     
+
+        data_negative = sorted(glob.glob(folder + 'data_negative*.wav'))
+        data_positive = sorted(glob.glob(folder + 'data_positive*.wav'))
+
+        label_negative = sorted(glob.glob(folder + 'label_negative*.pt'))
+        label_positive = sorted(glob.glob(folder + 'label_positive*.pt'))
+
+        self.data = data_negative + data_positive 
+        self.label = label_negative + label_positive
+        
+        self.number_frequencies = number_frequencies
+        self.number_time_steps = number_time_steps
+        self.spectrogram_str = spectrogram_str
+        self.normalize = normalize
+        self.mask_str = mask_str
+        
+        self.t_l = t_l
+        self.f_l = f_l
+        
+    def create_spectrogram(self,waveform_shape):
+        '''
+        Output is a spectrogram of size [1,number_frequencies, ~number_time_steps]
+        '''
+
+
+        n_fft = self.number_frequencies*2  -1 # to ensure we have 101 frequencies 
+        win_length = None
+        hop_length =int( waveform_shape/self.number_time_steps) # ensures we have 5556 time steps - as close to 5511 as I could get
+
+        # define transformation
+        spectrogram = T.Spectrogram(
+            n_fft=n_fft,
+            win_length=win_length,
+            hop_length=hop_length,
+            center=True,
+            pad_mode="reflect",
+            power=2.0,
+        )
+        return spectrogram    
+        
+        
+        
+    def __len__(self):
+        
+        return len(self.data)
+    
+    
+    
+    
+    
+    def __getitem__(self, index):
+        # print(data)
+        # print(index)
+        wave,sample_rate = torchaudio.load(self.data[index])
+        label= torch.load(self.label[index])
+        
+  
+        
+        #reshape to [1,x] size
+        shape = label.shape[1]
+        label.reshape([1,shape])
+        
+        
+        if self.spectrogram_str == True:
+            spectrogram =  T.MelSpectrogram(sample_rate,
+                                            n_fft=self.number_time_steps,
+                                            n_mels = self.number_frequencies,
+                                            normalized = self.normalize)
+            spec = spectrogram(wave)
+
+            
+            
+            if self.mask_str == True:
+                spec_new, labels_new = mask_freq_time(spec, 
+                                                      label,
+                                                      t_l = self.t_l,
+                                                      f_l = self.f_l)
+                
+                
+                return [spec_new,labels_new]
+            else:
+
+                
+                return [spec,label]
+        
+        else:
+            return [[wave,sample_rate],label]

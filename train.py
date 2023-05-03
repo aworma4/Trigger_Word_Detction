@@ -12,7 +12,7 @@ from data_loading import *
 from torch.utils.data import DataLoader
 from torchsummary import summary
 
-epochs = 53
+epochs = 100
 cutoff = 0.1 # using a really low one 
 lr =0.01
 batch_size = 4
@@ -28,9 +28,11 @@ label_time = 1375
 
 #### Load data 
 
-test_waveform = ReadData('test',spectrogram_str='False')
-test = ReadData('test',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
-train = ReadData('train',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
+test_waveform = ReadData_Mel('test',spectrogram_str=False)
+test = ReadData_Mel('test',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = 151,number_time_steps = 400,t_l = 100, f_l = 2)
+#ReadData('test',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
+train = ReadData_Mel('train',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = 151,number_time_steps = 400,t_l = 100, f_l = 2)
+#ReadData('train',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
 
 train_loader = DataLoader(train, batch_size, shuffle=False)
 test_loader = DataLoader(test, batch_size, shuffle=False)
@@ -51,7 +53,9 @@ output_time = label_time
 hidden_time = output_time #could change this down the line 
 
 
-model = torch.load('model_test_28_04_23_100_epochs')
+model =TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
+ 
+#torch.load('model_test_28_04_23_100_epochs')
 #TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
 #SimpleRNN(time = input_time,dropout_rate=0.5)
 
