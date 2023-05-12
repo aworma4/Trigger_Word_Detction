@@ -1,6 +1,10 @@
 # AIG
 Artifical Intelligence Group - project - investigation trigger word detector 
 
+Data set from Tensorflow speech_commands:
+http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
+
+
 * create system for takign short wave recordings (10sec <) and then apply the mdoel to then return an indication if the tw detector was activated. 
 * Functionalise and create app
 
