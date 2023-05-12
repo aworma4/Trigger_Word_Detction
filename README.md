@@ -5,11 +5,8 @@ Data set from Tensorflow speech_commands:
 http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
 
 
-* create system for takign short wave recordings (10sec <) and then apply the mdoel to then return an indication if the tw detector was activated. 
-* Functionalise and create app
-
-
-* Test values for spec_freq, spec_time, label_time  - might try setting spec_time == label_time 
+* functionalise training
+* Re run for more training dat (currently only using 20 total)
 
 
 
