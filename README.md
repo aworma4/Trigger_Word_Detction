@@ -14,3 +14,7 @@ http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
 
 
 * Change initial training data to include 0-4 words random (non overlapping) with some trigger words and some not.  - should improve the utility of the tw detector
+
+
+# Run streamlit app
+streamlit run .\streamlit_app\streamlit_app.py
