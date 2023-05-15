@@ -7,7 +7,8 @@ http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
 
 # to dos 
 
-* functionalise training + introduce MLflow 
+* functionalise training + introduce MLflow  - 
+Done need to add to a separate text file - not sure the early stopping has done anything 
 
 * Re run for more training dat (currently only using 20 total)
 
