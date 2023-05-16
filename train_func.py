@@ -353,6 +353,9 @@ experiment_name = 'test1'
 mlflow.set_experiment(experiment_name)
 experiment = mlflow.get_experiment_by_name(experiment_name)
 
+
+print(f'Size training data set {len(train_data)}')
+
 with mlflow.start_run() as run:  
     # Log our parameters into mlflow
     for key, value in vars(args).items():
@@ -369,7 +372,7 @@ View test outputs
 
 # test on test data
 testloader = test_data
-for i, data in enumerate(testloader, 0,2):
+for i, data in enumerate(testloader):
     # get the inputs; data is a list of [inputs, labels]
     inputs, labels_og = data
 

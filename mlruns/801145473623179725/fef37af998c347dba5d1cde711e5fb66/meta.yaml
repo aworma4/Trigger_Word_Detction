@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/AT030915/AIG/mlruns/801145473623179725/fef37af998c347dba5d1cde711e5fb66/artifacts
+end_time: 1684250381439
+entry_point_name: ''
+experiment_id: '801145473623179725'
+lifecycle_stage: active
+run_id: fef37af998c347dba5d1cde711e5fb66
+run_name: 200_odd_single_word_data_files
+run_uuid: fef37af998c347dba5d1cde711e5fb66
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1684247289416
+status: 3
+tags: []
+user_id: AT030915

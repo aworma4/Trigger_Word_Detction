@@ -181,10 +181,14 @@ class Create_Test_Train_Data():
     
 '''    
 # run the class     
+
+nine folder > 3k files
+backward folder > 1.5k files
+
     
 background_filepath =  'speech_commands_v0.02.tar/_background_noise_/doing_the_dishes.wav'
 sample_time = 10
-resample_rate = 5000
+resample_rate = 5000 #think I want to change this to 16k - the original rate
 number_samples = 10
 folder_trigger_word = 'speech_commands_v0.02.tar/nine/'
 folder_negative_word = 'speech_commands_v0.02.tar/backward/'
