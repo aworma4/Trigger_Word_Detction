@@ -20,6 +20,9 @@ from torchsummary import summary
 import numpy as np
 
 
+
+
+
 # Create Params dictionary
 
 class Params(object):
@@ -73,6 +76,15 @@ args =Params(batch_size = 4, test_batch_size = 4,
 cuda = not args.cuda and torch.cuda.is_available()
 device = get_default_device() #not sure if I'm going to use this 
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
+
+#### Reproducibility
+torch.manual_seed(args.seed)
+torch.cuda.manual_seed(args.seed)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False 
+
+
+
 
 
 '''
@@ -318,3 +330,7 @@ with mlflow.start_run() as run:
         mlflow.log_param(key, value)
     
     main()
+    
+    
+#final test data output
+test(0,test_data)

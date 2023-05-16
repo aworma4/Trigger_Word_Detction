@@ -18,9 +18,10 @@ lr =0.01
 batch_size = 4
 
 #spectrogram parameters
-spec_freq = 101
-spec_time = 5511
-#label time
+#spec_freq = 101
+#spec_time = 5511
+#ReadData('test',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
+#ReadData('train',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
 label_time = 1375
 
 
@@ -30,12 +31,12 @@ label_time = 1375
 
 test_waveform = ReadData_Mel('test',spectrogram_str=False)
 test = ReadData_Mel('test',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = 151,number_time_steps = 400,t_l = 100, f_l = 2)
-#ReadData('test',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
 train = ReadData_Mel('train',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = 151,number_time_steps = 400,t_l = 100, f_l = 2)
-#ReadData('train',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
 
-train_loader = DataLoader(train, batch_size, shuffle=False)
-test_loader = DataLoader(test, batch_size, shuffle=False)
+
+#These are not actually used  - as the model can't handle batch inputs
+# train_loader = DataLoader(train, batch_size, shuffle=False)
+# test_loader = DataLoader(test, batch_size, shuffle=False)
 
 
 #### Initialise model
