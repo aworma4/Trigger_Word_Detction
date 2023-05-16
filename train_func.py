@@ -71,7 +71,7 @@ args =Params(batch_size = 4, test_batch_size = 4,
              early_stopper_patience = 3,
              early_stopper_min_delta=0.01,
              label_time = 1375,
-            cutoff =0.8) #enter zero then label_time (shape of output of output of nerual network will be equal to the size of the input spectrogram)),
+            cutoff =0.1) #enter zero then label_time (shape of output of output of nerual network will be equal to the size of the input spectrogram)),
 
 cuda = not args.cuda and torch.cuda.is_available()
 device = get_default_device() #not sure if I'm going to use this 
@@ -195,12 +195,17 @@ def log_scalar(name, value, step):
     
     
 
-def train(epoch,N_trainloader):
+def train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler):
+    rv = 5 #  decimal places for rounding
+    
+    
     running_loss = 0.0
     running_accuracy = 0.0
+    running_accuracy2 = 0.0
     running_prec = 0.0
     running_rec = 0.0
     running_av_label = 0.0 
+    
     model.train()
     for i, data in enumerate(train_data):
         # get the inputs; data is a list of [inputs, labels]
@@ -216,8 +221,9 @@ def train(epoch,N_trainloader):
         outputs = model(inputs)
         loss = criterion(outputs, labels)
         
-        if early_stopper.early_stop(loss):             
-            break
+        #This doesn't work as it will only stop loading in at a certain batch
+        # if early_stopper.early_stop(loss):             
+        #     break
         
         
         loss.backward()
@@ -226,7 +232,7 @@ def train(epoch,N_trainloader):
         # print statistics
         running_loss += loss.item()
         running_accuracy += f_acc(outputs,labels)
-        #get_accuracy(labels, outputs,cutoff=args.cutoff)
+        running_accuracy2 += get_accuracy(labels, outputs,cutoff=args.cutoff)
         running_prec += f_prec(outputs,labels)
         running_rec  += f_rec(outputs,labels)
         running_av_label += torch.mean(labels)
@@ -234,15 +240,20 @@ def train(epoch,N_trainloader):
         #     print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.7f}')
         #     running_loss = 0.0
     
-    lr_end = scheduler.get_last_lr()
-    acc = running_accuracy/N_trainloader
-    prec = running_prec/N_trainloader
-    rec = running_rec/N_trainloader
+    lr_end = np.round(scheduler.get_last_lr(),rv)
+    acc = np.round(running_accuracy.detach().numpy()/N_trainloader,rv)
+    acc2 = np.round(running_accuracy2/N_trainloader,rv)
+    prec = np.round(running_prec.detach().numpy()/N_trainloader,rv)
+    rec = np.round(running_rec.detach().numpy()/N_trainloader,rv)
     
-    mean_label = running_av_label/N_trainloader
+    mean_label = np.round(running_av_label.detach().numpy()/N_trainloader,rv)
     
-    print(f'Epoch [{epoch + 1}] loss: {loss}, learning rate {lr_end}, training accuracy cutoff ({args.cutoff}): {acc}, average label {mean_label}')
-        
+    loss_rv = np.round(loss.detach().numpy(),rv)
+    
+    print(f'Epoch [{epoch + 1}] loss: {loss_rv}, learning rate {lr_end}, training accuracy cutoff ({args.cutoff}): {acc}, average label {mean_label}')
+    
+    #not needed- was just checking that f_acc was working
+    #print(f'{acc2}')
     log_scalar('loss',loss,step=epoch)
     log_scalar('lr',lr_end[0],step=epoch)
     log_scalar('accuracy_with_cutoff',acc,step=epoch)
@@ -257,7 +268,10 @@ def train(epoch,N_trainloader):
     
     
     
-def test(epoch,test_data):
+def test(epoch,test_data,model):
+    rv = 5  #round decimal places
+    
+    
     running_loss = 0.0
     running_accuracy = 0.0
     running_prec = 0.0
@@ -284,29 +298,30 @@ def test(epoch,test_data):
         running_rec  += f_rec(outputs,labels)
         running_av_label += torch.mean(labels)
 
-    acc = running_accuracy/N_trainloader
-    prec = running_prec/N_trainloader
-    rec = running_rec/N_trainloader    
-    mean_label = running_av_label/N_trainloader
-    print(f'Test for Epoch [{epoch + 1}], accuracy  = {acc}, precision =  {prec}, recall =  {rec}, average label {mean_label}')
+    acc = np.round(running_accuracy.detach().numpy()/N_trainloader,rv)
+    prec = np.round(running_prec.detach().numpy()/N_trainloader,rv)
+    rec = np.round(running_rec.detach().numpy()/N_trainloader   ,rv)
+    mean_label = np.round(running_av_label.detach().numpy()/N_trainloader,rv)
+    print(f'              Test for Epoch [{epoch + 1}], accuracy,precision,recall ({acc},{prec},{rec}), average label {mean_label}')
 
     
 
     
     
-def main():
+def main(out_name = 'model_test'):
     N_trainloader = len(train_data)
 
     for epoch in range(args.epochs):  # loop over the dataset multiple times
         
-        train(epoch,N_trainloader)
-        #test(epoch,test_data)
-
+        train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler)
+        test(epoch,test_data,model)
+        scheduler.step()    
+    
+    #save model + output final test output
+    test(epoch,test_data,model)
+    torch.save(model, out_name)
     
 
-    
-    scheduler.step()    
-    
     
     
 
@@ -317,6 +332,9 @@ from torchmetrics.classification import BinaryF1Score, BinaryPrecision, BinaryRe
 f_prec = BinaryPrecision(threshold=args.cutoff)
 f_rec = BinaryRecall(threshold=args.cutoff)
 f_acc = BinaryAccuracy(threshold=args.cutoff)
+
+#load preexisting model
+#model = torch.load('model_test')
 
 
 #choose experiment name
@@ -329,8 +347,29 @@ with mlflow.start_run() as run:
     for key, value in vars(args).items():
         mlflow.log_param(key, value)
     
-    main()
+    main(out_name = 'model_test')
     
     
-#final test data output
-test(0,test_data)
+
+    
+    
+'''
+View test outputs
+
+# test on test data
+testloader = test_data
+for i, data in enumerate(testloader, 0,2):
+    # get the inputs; data is a list of [inputs, labels]
+    inputs, labels_og = data
+
+    labels =  resize_label(labels_og, args.label_time)
+    
+    out = model(inputs)
+    
+    print(get_accuracy(labels, out,cutoff=0.8))
+    
+    #plot 
+    plot_new_vs_old_label(labels,out.detach().numpy())
+    
+
+'''
