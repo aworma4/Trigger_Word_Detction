@@ -221,9 +221,7 @@ def train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler):
         outputs = model(inputs)
         loss = criterion(outputs, labels)
         
-        #This doesn't work as it will only stop loading in at a certain batch
-        # if early_stopper.early_stop(loss):             
-        #     break
+
         
         
         loss.backward()
@@ -263,6 +261,10 @@ def train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler):
     log_scalar('mean_label',mean_label,step=epoch)
     
     scheduler.step()
+    
+    
+    return loss_rv
+
 
 
     
@@ -310,10 +312,19 @@ def test(epoch,test_data,model):
     
 def main(out_name = 'model_test'):
     N_trainloader = len(train_data)
+    
+    frac_epochs = int(0.2*args.epochs)  #allows the first 20% of the epoch to run before early stopping is allowed to kick in
 
     for epoch in range(args.epochs):  # loop over the dataset multiple times
         
-        train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler)
+        loss = train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler)
+        
+        #This should work when considering the whole batch
+        #allow 20 epochsto go first
+        if early_stopper.early_stop(loss) and epoch > frac_epochs:             
+            print(f"Stopped early at Epoch {epoch}, because there were {args.early_stopper_patience} epochs where the loss function increased by more than {args.early_stopper_min_delta} relative to the global minimum")
+            break
+        
         test(epoch,test_data,model)
         scheduler.step()    
     
