@@ -360,13 +360,13 @@ class ReadData_Mel(torch.utils.data.Dataset):
     
     '''
     
-    def __init__(self, str_type = 'test',spectrogram_str =False, normalize = True, mask_str = True, number_frequencies = 101,number_time_steps = 200,t_l = 100, f_l = 2):
+    def __init__(self, folder = 'data/',str_type = 'test',spectrogram_str =False, normalize = True, mask_str = True, number_frequencies = 101,number_time_steps = 200,t_l = 100, f_l = 2):
           
 
         if str_type=='test':
-            folder = 'data/test/'
+            folder = folder + 'test/'
         else:
-            folder = 'data/train/'
+            folder = folder _ 'train/'
 
         #generate file paths     
 
