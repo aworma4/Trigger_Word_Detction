@@ -366,7 +366,7 @@ class ReadData_Mel(torch.utils.data.Dataset):
         if str_type=='test':
             folder = folder + 'test/'
         else:
-            folder = folder _ 'train/'
+            folder = folder + 'train/'
 
         #generate file paths     
 
