@@ -93,11 +93,13 @@ torch.backends.cudnn.benchmark = False
 
 
 #### Load data 
+folder= 'data_multiple_clips/'
+print(f'folder: {folder}')
 
-test_waveform = ReadData_Mel('test',spectrogram_str=False)
-test_data = ReadData_Mel('test',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = args.number_frequencies,number_time_steps = args.number_time_steps, t_l = 100, f_l = 2)
+test_waveform = ReadData_Mel(folder = folder,str_type='test',spectrogram_str=False)
+test_data = ReadData_Mel(folder = folder, str_type='test',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = args.number_frequencies,number_time_steps = args.number_time_steps, t_l = 100, f_l = 2)
 #ReadData('test',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
-train_data = ReadData_Mel('train',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = args.number_frequencies,number_time_steps = args.number_time_steps, t_l = 100, f_l = 2)
+train_data = ReadData_Mel(folder = folder,str_type ='train',spectrogram_str=True, normalize = True, mask_str = False, number_frequencies = args.number_frequencies,number_time_steps = args.number_time_steps, t_l = 100, f_l = 2)
 #ReadData('train',spectrogram_str='True',number_frequencies = spec_freq,number_time_steps = spec_time)
 
 train_loader = DataLoader(train_data, args.batch_size, shuffle=False)

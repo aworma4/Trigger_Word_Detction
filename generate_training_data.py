@@ -485,7 +485,9 @@ val_1 = Create_Test_Train_Data_multiple_recs(1,background_filepath, sample_time,
 val_2 = Create_Test_Train_Data_multiple_recs(2,background_filepath, sample_time,resample_rate,number_samples, folder_trigger_word,folder_negative_word,outpath_location)
 
 #generates 2*number_samples clips
-val_either = Create_Test_Train_Data(background_filepath, sample_time,resample_rate,number_samples, folder_trigger_word,folder_negative_word,outpath_location)
+#generates 2*number_samples clips
+number_samples_half = int(number_samples/2)
+val_either = Create_Test_Train_Data(background_filepath, sample_time,resample_rate,number_samples_half, folder_trigger_word,folder_negative_word,outpath_location)
 
 
 wav,label_out = val_1.generate_all()
