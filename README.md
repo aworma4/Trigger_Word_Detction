@@ -11,6 +11,9 @@ http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
 Changed to 200 total - works for recognisign the location of a word but not for the word itself - change examples to accomodate this .
 
 * Change initial training data to include 0-4 words random (non overlapping) with some trigger words and some not.  - should improve the utility of the tw detector
+Done
+
+* run for new data set
 
 * Change model to input batches of audio - i.e. add a 4th batch dimension
 
