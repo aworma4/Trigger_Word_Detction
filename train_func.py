@@ -94,6 +94,8 @@ torch.backends.cudnn.benchmark = False
 
 #### Load data 
 folder= 'data_multiple_clips/'
+out_name = 'model_multiple_clips_in_Training_100_2nd_train'
+
 print(f'folder: {folder}')
 
 test_waveform = ReadData_Mel(folder = folder,str_type='test',spectrogram_str=False)
@@ -127,7 +129,8 @@ if output_time ==0:
 hidden_time = output_time #could change this down the line 
 
 
-model =TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
+model =torch.load('Saved_models/model_multiple_clips_in_Training_100')
+#TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
  
 #torch.load('model_test_28_04_23_100_epochs')
 #TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
@@ -363,7 +366,7 @@ with mlflow.start_run() as run:
     for key, value in vars(args).items():
         mlflow.log_param(key, value)
     
-    main(out_name = 'model_test')
+    main(out_name = out_name)
     
     
 

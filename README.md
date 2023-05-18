@@ -14,8 +14,10 @@ Changed to 200 total - works for recognisign the location of a word but not for 
 Done
 
 * run for new data set
+Done
 
 * Change model to input batches of audio - i.e. add a 4th batch dimension
+Optional - doesn't add much more.
 
 # Run streamlit app
 terminal:
