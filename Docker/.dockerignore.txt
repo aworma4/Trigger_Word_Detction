@@ -1,0 +1,12 @@
+*/.py*
+*.git*
+*/data*
+*/data_multiple_clips*
+*/mlruns*
+*Old_notebooks*
+*Saved_models*
+*speech_commands_v0.02.tar*
+*streamlit_app*
+*Useful_notebooks*
+*user_generated_recordings"
+*venv*

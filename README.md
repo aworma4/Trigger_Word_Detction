@@ -30,6 +30,13 @@ mlflow server
 
 
 #  Using the Code 
+### Python version
+3.10.11
+
+### Docker
+# You can build the docker file using (note you will still need to downloaded the raw tensor flow dataset and then build train/test data from it)
+docker build -t docker_test .
+
 
 ### Download Data
 Download the tensorflow audio recordings http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz
