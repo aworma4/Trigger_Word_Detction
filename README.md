@@ -43,7 +43,10 @@ Adjust the example in generate_training_data for the required number of training
 Run the train_func.py - may need to change file paths + paramters etc
 jupyter notebook:
 %run train_func.py
+or in terminal:
+python -m train_func.py
 
 ### Inferencing
 Load streamlit app - point app at the torch saved model - record your own audios
+terminal:
 streamlit run streamlit_app.py
