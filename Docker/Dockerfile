@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt --user
 COPY . . 
 
 #launch jupyterlab
-RUN python -m jupyterlab
+#RUN python -m jupyterlab
 
 # enter entry point parameters executing the container
 ENTRYPOINT ["python", "./runserver.py"] 
