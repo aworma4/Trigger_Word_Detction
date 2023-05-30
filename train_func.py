@@ -72,7 +72,7 @@ args =Params(batch_size = 4, test_batch_size = 4,
              log_interval = 200,
              early_stopper_patience = 5,
              early_stopper_min_delta=0.01,
-             label_time = 1375,
+             label_time = 801,#changed to same size as input time dimension of spectrogram.
             cutoff =0.1) #enter zero then label_time (shape of output of output of nerual network will be equal to the size of the input spectrogram)),
 
 cuda = not args.cuda and torch.cuda.is_available()
@@ -133,9 +133,9 @@ if output_time ==0:
 hidden_time = output_time #could change this down the line 
 
 
-model =torch.load('Saved_models/model_multiple_clips_in_Training_100')
-#TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
- 
+model =TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
+#torch.load('Saved_models/model_multiple_clips_in_Training_100')
+
 #torch.load('model_test_28_04_23_100_epochs')
 #TriggerWord_LSTM(input_freq, input_time , hidden_time, output_time, Conv_p(),GRU_p())
 #SimpleRNN(time = input_time,dropout_rate=0.5)
@@ -263,11 +263,11 @@ def train(epoch,N_trainloader,model,train_data,criterion,optimizer,scheduler):
     #print(f'{acc2}')
     log_scalar('loss',loss,step=epoch)
     log_scalar('lr',lr_end[0],step=epoch)
-    log_scalar('accuracy_with_cutoff',acc,step=epoch)
-    log_scalar('precision_with_cutoff',prec,step=epoch)
-    log_scalar('recall_with_cutoff',rec,step=epoch)    
+    log_scalar('train_accuracy_with_cutoff',acc,step=epoch)
+    log_scalar('train_precision_with_cutoff',prec,step=epoch)
+    log_scalar('train_recall_with_cutoff',rec,step=epoch)    
 
-    log_scalar('mean_label',mean_label,step=epoch)
+    log_scalar('train_mean_label',mean_label,step=epoch)
     
     scheduler.step()
     
@@ -314,7 +314,13 @@ def test(epoch,test_data,model):
     rec = np.round(running_rec.detach().numpy()/N_trainloader   ,rv)
     mean_label = np.round(running_av_label.detach().numpy()/N_trainloader,rv)
     print(f'              Test for Epoch [{epoch + 1}], accuracy,precision,recall ({acc},{prec},{rec}), average label {mean_label}')
+    
+    #log metrics in MLFLOW
+    log_scalar('test_accuracy_with_cutoff',acc,step=epoch)
+    log_scalar('test_precision_with_cutoff',prec,step=epoch)
+    log_scalar('test_recall_with_cutoff',rec,step=epoch)    
 
+    log_scalar('test_mean_label',mean_label,step=epoch)
     
 
     
