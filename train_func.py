@@ -67,10 +67,10 @@ class Params(object):
 args =Params(batch_size = 4, test_batch_size = 4,
              number_frequencies = 151,
              number_time_steps = 400,
-             epochs = 100, lr =0.01, 
+             epochs = 200, lr =0.01, 
              seed = 1, cuda = False, 
              log_interval = 200,
-             early_stopper_patience = 3,
+             early_stopper_patience = 5,
              early_stopper_min_delta=0.01,
              label_time = 1375,
             cutoff =0.1) #enter zero then label_time (shape of output of output of nerual network will be equal to the size of the input spectrogram)),
@@ -97,8 +97,8 @@ torch.backends.cudnn.benchmark = False
 
 
 #### Load data 
-folder= 'data_multiple_clips/'
-out_name = 'model_multiple_clips_in_Training_100_2nd_train'
+folder= 'data_multiple_clips_ns_100_negword_zero/'
+out_name = 'model_multiple_clips_ns_100_negword_zero'
 
 print(f'folder: {folder}')
 

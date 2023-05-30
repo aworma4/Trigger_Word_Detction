@@ -472,27 +472,41 @@ from generate_training_data import *
 # backward folder > 1.5k files
 
 
+# run the class     
+
+from generate_training_data import *
+# nine folder > 3k files
+# backward folder > 1.5k files
+
+
 background_filepath =  'speech_commands_v0.02.tar/_background_noise_/doing_the_dishes.wav'
 sample_time = 10
 resample_rate = 16000 #think I want to change this to 16k - the original rate
-number_samples = 10
+number_samples = 100
 folder_trigger_word = 'speech_commands_v0.02.tar/nine/'
-folder_negative_word = 'speech_commands_v0.02.tar/backward/'
-outpath_location = 'data_multiple_clips'
+folder_negative_word = 'speech_commands_v0.02.tar/zero/'  #changed from backward (2 sylables) to zero
+outpath_location = f'data_multiple_clips_ns_{number_samples}_negword_zero'
+
+import os
+#os.mkdir(outpath_location)
+os.mkdir(outpath_location + '/train')
+os.mkdir(outpath_location + '/test')
+
 
 #create files with 1 clip from each, two clips from each, and 1 from each
 val_1 = Create_Test_Train_Data_multiple_recs(1,background_filepath, sample_time,resample_rate,number_samples, folder_trigger_word,folder_negative_word,outpath_location)
 val_2 = Create_Test_Train_Data_multiple_recs(2,background_filepath, sample_time,resample_rate,number_samples, folder_trigger_word,folder_negative_word,outpath_location)
 
-#generates 2*number_samples clips
-#generates 2*number_samples clips
-number_samples_half = int(number_samples/2)
+#generates 1/2*number_samples clips
+number_samples_half = int(2 * number_samples/2)  #changed to using the same number
 val_either = Create_Test_Train_Data(background_filepath, sample_time,resample_rate,number_samples_half, folder_trigger_word,folder_negative_word,outpath_location)
 
 
 wav,label_out = val_1.generate_all()
 wav,label_out = val_2.generate_all()
 wav,label_out = val_either.generate_all()
+
+
 
 '''
 
