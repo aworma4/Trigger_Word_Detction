@@ -19,6 +19,8 @@ from torch.utils.data import DataLoader
 from torchsummary import summary
 import numpy as np
 
+import mlflow.pytorch
+from torchmetrics.classification import BinaryF1Score, BinaryPrecision, BinaryRecall, BinaryAccuracy
 
 
 
@@ -76,6 +78,8 @@ args =Params(batch_size = 4, test_batch_size = 4,
 cuda = not args.cuda and torch.cuda.is_available()
 device = get_default_device() #not sure if I'm going to use this 
 kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
+
+print(f'Is cuda? {cuda}')
 
 #### Reproducibility
 torch.manual_seed(args.seed)
@@ -341,8 +345,6 @@ def main(out_name = 'model_test'):
     
     
 
-import mlflow.pytorch
-from torchmetrics.classification import BinaryF1Score, BinaryPrecision, BinaryRecall, BinaryAccuracy
 
 #F1 = BinaryF1Score(threshold=args.cutoff)
 f_prec = BinaryPrecision(threshold=args.cutoff)

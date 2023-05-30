@@ -2,6 +2,7 @@
 # Main model file 
 '''
 import torch
+import torch.nn as nn
 
 def get_default_device():
     '''
@@ -15,7 +16,7 @@ def get_default_device():
 
     
     
-import torch.nn as nn
+
 
 #class to store Conv parameters - generally these won't be changed - but I'm leaving the option open here
 # I'd only really want to change out_channels
