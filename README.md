@@ -1,5 +1,11 @@
 # AIG
 Artifical Intelligence Group - project - investigation trigger word detector 
+Alex Wormald - 14/06/2023
+
+# Possible extensions:
+Consider applying architecture from: https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/43969.pdf
+OR changing the input data set.
+
 
 # Data set
 Data set from Tensorflow speech_commands:
@@ -61,3 +67,6 @@ python -m train_func.py
 Load streamlit app - point app at the torch saved model - record your own audios
 terminal:
 streamlit run streamlit_app.py
+
+# Useful Thesis - found post code creation:
+https://ntnuopen.ntnu.no/ntnu-xmlui/bitstream/handle/11250/2564171/19711_FULLTEXT.pdf?sequence=1
